@@ -6,6 +6,7 @@ export class User {
   public id: number;
   public meanness: Ratio;
   public politics: Wheel;
+  public fandom: Wheel;
   public frequencies: {
     post: Ratio;
     share: {
@@ -16,6 +17,7 @@ export class User {
       negative: Ratio;
       positive: Ratio;
     };
+    like: Ratio;
     follow: Ratio;
     unfollow: Ratio;
   };
@@ -26,6 +28,7 @@ export class User {
     this.id = lastUserId++;
     this.meanness = generateNumber();
     this.politics = new Wheel();
+    this.fandom = new Wheel();
     this.frequencies = {
       post: generateNumber(),
       share: {
@@ -36,19 +39,20 @@ export class User {
         negative: generateNumber(),
         positive: generateNumber(),
       },
+      like: generateNumber(),
       follow: generateNumber(),
       unfollow: generateNumber(),
     };
     this.followLimit = generateNumber(1, 5000);
     this.fameLevel = generateNumber(1, 5000);
-    this.followers = generateNumber(1, 5);
+    this.followers = generateNumber(1, 15);
   }
 }
 
 export class Wheel {
   public slot: number;
   constructor(private slots = 6) {
-    this.slot = generateNumber(0, this.slots - 1);
+    this.slot = generateNumber(0, this.slots);
   }
   get opposite(): number {
     return (this.slot + this.slots / 2) % this.slots;
@@ -70,20 +74,22 @@ export class Post {
   public id: number;
   public results?: PostResults;
   public politics: Wheel;
-  public content: string;
+  public fandom: Wheel;
   constructor(private idea: Idea) {
     this.id = lastPostId++;
     this.politics = this.idea.politics;
-    this.content = 'hi';
+    this.fandom = this.idea.fandom;
   }
 }
 
 export class Idea {
   public politics: Wheel;
+  public fandom: Wheel;
   public id: number;
   constructor() {
     this.id = lastIdeaId++;
     this.politics = new Wheel();
+    this.fandom = new Wheel();
   }
 }
 
@@ -96,6 +102,7 @@ export interface PostResults {
     negative: number;
     positive: number;
   };
+  like: number;
   follows: User[],
   unfollows: number[]
 }
