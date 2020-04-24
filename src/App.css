@@ -16,6 +16,10 @@
   border: 1px solid grey;
 }
 
-.idea-box {
-  font-size: 30px;
+button {
+  font-size: 1rem;
+  background: transparent;
+  border: 1px solid green;
+  color: green;
+  border-radius: 2px;
 }

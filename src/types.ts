@@ -62,19 +62,19 @@ export class Wheel {
    * @param other Other wheel to compare to.
    */
   compare(other: Wheel): number {
-    let distance1 = Math.abs((this.slot - other.slot));
+    let distance1 = Math.abs(this.slot - other.slot);
     let distance2 =
       Math.min(this.slot, other.slot) +
       (this.slots - Math.max(this.slot, other.slot));
-    return -2 * (Math.min(distance1, distance2) / (this.slots / 2) -  0.5);
+    return -2 * (Math.min(distance1, distance2) / (this.slots / 2) - 0.5);
   }
 }
 
 export class Post {
   public id: number;
   public results?: PostResults;
-  public politics: Wheel;
-  public fandom: Wheel;
+  public politics?: Wheel;
+  public fandom?: Wheel;
   constructor(private idea: Idea) {
     this.id = lastPostId++;
     this.politics = this.idea.politics;
@@ -83,13 +83,15 @@ export class Post {
 }
 
 export class Idea {
-  public politics: Wheel;
-  public fandom: Wheel;
+  public politics?: Wheel;
+  public fandom?: Wheel;
   public id: number;
   constructor() {
     this.id = lastIdeaId++;
-    this.politics = new Wheel();
-    this.fandom = new Wheel();
+    const hasPolitics = Math.random() < 0.65;
+    const hasFandom = !hasPolitics || Math.random() < 0.65;
+    this.politics = hasPolitics ? new Wheel() : undefined;
+    this.fandom = hasFandom ? new Wheel() : undefined;
   }
 }
 
@@ -103,8 +105,8 @@ export interface PostResults {
     positive: number;
   };
   like: number;
-  follows: User[],
-  unfollows: number[]
+  follows: User[];
+  unfollows: number[];
 }
 
 // Number between 0 and 1.

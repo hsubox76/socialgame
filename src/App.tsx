@@ -22,6 +22,20 @@ function generateIdeas(numIdeas: number) {
   return ideas;
 }
 
+function getCompositeAlignment(user1: Post|User, user2: User) {
+  const politicsAlignment = user1.politics && user1.politics.compare(user2.politics);
+  const fandomAlignment = user1.fandom && user1.fandom.compare(user2.fandom);
+  let compositeAlignment = 0;
+  if (politicsAlignment && fandomAlignment) {
+    compositeAlignment = (politicsAlignment + fandomAlignment) / 2;
+  } else if (!politicsAlignment && fandomAlignment) {
+    compositeAlignment = fandomAlignment;
+  } else if (!fandomAlignment && politicsAlignment) {
+    compositeAlignment = politicsAlignment;
+  }
+  return compositeAlignment;
+}
+
 function getUserReactions(post: Post, users: User[]) {
   const results: PostResults = {
     reply: { negative: 0, positive: 0 },
@@ -36,10 +50,7 @@ function getUserReactions(post: Post, users: User[]) {
   const followThreshhold = 0.6;
   const unfollowThreshhold = 0.5;
   for (const user of users) {
-    // This can later get rolled into a composite score with fandomAlignment etc
-    const politicsAlignment = post.politics.compare(user.politics);
-    const fandomAlignment = post.politics.compare(user.fandom);
-    const compositeAlignment = (politicsAlignment + fandomAlignment) / 2;
+    const compositeAlignment = getCompositeAlignment(post,  user);
     const scores = {
       reply: {
         positive: compositeAlignment * user.frequencies.reply.positive,
@@ -67,8 +78,9 @@ function getUserReactions(post: Post, users: User[]) {
       // this should be changed at some point
       const exposedUsers = generateUsers(user.followers);
       for (const exposedUser of exposedUsers) {
-        const compositeAlignment = post.politics.compare(exposedUser.politics);
+        const compositeAlignment = getCompositeAlignment(post, exposedUser);
         const followScore = exposedUser.frequencies.follow * compositeAlignment;
+        // TODO: Should run all the other scores (like/share/reply) on the exposedUser too
         if (followScore > followThreshhold) {
           results.follows.push(exposedUser);
         }
@@ -194,19 +206,33 @@ function App() {
       <h2>ideas</h2>
       {ideas.map((idea, index) => (
         <div key={index}>
-          <div className="idea-box">
-            idea {idea.id} | politics:{" "}
-            {politicsEmojis[Math.floor(idea.politics.slot)]} | fandom:{" "}
-            {fandomEmojis[Math.floor(idea.fandom.slot)]}
-            <button onClick={() => postIdea(idea)}>make a post</button>
+          <div className="idea-box flex spacey">
+            <div>
+            	idea {idea.id}
+            </div>
+            <div>
+              politics:
+              {idea.politics ? politicsEmojis[Math.floor(idea.politics.slot)] : '-'}
+            </div>
+            <div>
+              fandom:
+              {idea.fandom ? fandomEmojis[Math.floor(idea.fandom.slot)] : '-'}
+            </div>
+            <button onClick={() => postIdea(idea)}>post this</button>
           </div>
         </div>
       ))}
       <h2>post</h2>
       {posts.map((post, index) => (
         <div key={index}>
-          <div>
-            post {index}: politics: {post.politics.slot}
+          <div className="flex spacey">
+            <div>post {index}</div>
+            <div>
+              politics: {post.politics && politicsEmojis[post.politics.slot]}
+            </div>
+            <div>
+              fandom: {post.fandom && fandomEmojis[post.fandom.slot]}
+            </div>
           </div>
           <div className="flex spacey">
             <div className="flex spacey boxy">
